@@ -1,5 +1,5 @@
 use clap::Parser;
-use libbitcoinkernel_sys::{
+use bitcoinkernel::{
     BlockManagerOptions, ChainType, ChainstateLoadOptions, ChainstateManager,
     ChainstateManagerOptions,
 };

@@ -1,7 +1,7 @@
 use bitcoin::consensus::deserialize;
 use bitcoin::hashes::Hash;
 use bitcoin::{PrivateKey, XOnlyPublicKey};
-use libbitcoinkernel_sys::ChainstateManager;
+use bitcoinkernel::ChainstateManager;
 use log::info;
 use rayon::prelude::*;
 use secp256k1::{PublicKey, Secp256k1, SecretKey};
