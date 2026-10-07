@@ -1,6 +1,7 @@
 use bitcoin::consensus::deserialize;
 use bitcoin::hashes::Hash;
 use bitcoin::{PrivateKey, XOnlyPublicKey};
+use bitcoinkernel::prelude::*;
 use bitcoinkernel::ChainstateManager;
 use log::info;
 use rayon::prelude::*;
@@ -129,27 +130,29 @@ pub fn scan_txs(
     birthday: i32,
 ) {
     info!("start!");
-    let chain_tip = chainman.get_block_index_tip();
+    let tip_height = chainman.active_chain().height();
     // start from 1 since genesis block has no undo data
     // TODO: make this start from wallet birthday / or taproot activation
-    let block_numbers = birthday..chain_tip.info().height;
+    let block_numbers = birthday..=tip_height;
     block_numbers
         .collect::<Vec<_>>()
         .par_iter()
         .for_each(|&block_num| {
-            let block_index = &chainman
-                .get_block_index_by_height(block_num)
-                .unwrap()
-                .into();
-            let raw_block: Vec<u8> = chainman.read_block_data(block_index).unwrap().into();
-            let undo = chainman.read_undo_data(&block_index).unwrap();
+            let block_index = chainman
+                .active_chain()
+                .at_height(block_num as usize)
+                .unwrap();
+            let raw_block: Vec<u8> = (&chainman.read_block_data(&block_index).unwrap())
+                .try_into()
+                .unwrap();
+            let undo = chainman.read_spent_outputs(&block_index).unwrap();
             let block: bitcoin::Block = deserialize(&raw_block).unwrap();
-            assert_eq!(block.txdata.len() - 1, undo.n_tx_undo);
+            assert_eq!(block.txdata.len() - 1, undo.count());
 
             let txs = 0..block.txdata.len() - 1;
             txs.collect::<Vec<_>>().par_iter().for_each(|&tx_num| {
-                let transaction_undo_size: u64 =
-                    undo.get_get_transaction_undo_size(tx_num.try_into().unwrap());
+                let tx_spent = undo.transaction_spent_outputs(tx_num).unwrap();
+                let transaction_undo_size: u64 = tx_spent.count() as u64;
                 let transaction_input_size: u64 =
                     block.txdata[tx_num + 1].input.len().try_into().unwrap();
                 assert_eq!(transaction_input_size, transaction_undo_size);
@@ -158,10 +161,12 @@ pub fn scan_txs(
                     ins: (0..transaction_input_size)
                         .into_par_iter()
                         .map(|j| Input {
-                            prevout: undo
-                                .get_prevout_by_index(tx_num as u64, j)
+                            prevout: tx_spent
+                                .coin(j as usize)
                                 .unwrap()
-                                .script_pubkey,
+                                .output()
+                                .script_pubkey()
+                                .to_bytes(),
                             script_sig: block.txdata[tx_num + 1].input[j as usize]
                                 .script_sig
                                 .to_bytes(),

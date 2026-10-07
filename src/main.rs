@@ -1,8 +1,5 @@
 use clap::Parser;
-use bitcoinkernel::{
-    BlockManagerOptions, ChainType, ChainstateLoadOptions, ChainstateManager,
-    ChainstateManagerOptions,
-};
+use bitcoinkernel::{ChainType, ChainstateManagerBuilder};
 
 mod kernel;
 mod scanner;
@@ -35,10 +32,10 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let chain_type = match args.network.to_lowercase().as_str() {
-        "mainnet" => ChainType::MAINNET,
-        "testnet" => ChainType::TESTNET,
-        "regtest" => ChainType::REGTEST,
-        "signet" => ChainType::SIGNET,
+        "mainnet" => ChainType::Mainnet,
+        "testnet" => ChainType::Testnet,
+        "regtest" => ChainType::Regtest,
+        "signet" => ChainType::Signet,
         _ => {
             eprintln!("Invalid network type: {}", args.network);
             std::process::exit(1);
@@ -53,14 +50,9 @@ fn main() {
     // Set up the kernel
     let _ = kernel::setup_logging().unwrap();
     let context = kernel::create_context(chain_type);
-    let chainman = ChainstateManager::new(
-        ChainstateManagerOptions::new(&context, &data_dir).unwrap(),
-        BlockManagerOptions::new(&context, &blocks_dir).unwrap(),
-        &context,
-    )
-    .unwrap();
-    chainman
-        .load_chainstate(ChainstateLoadOptions::new())
+    let chainman = ChainstateManagerBuilder::new(&context, &data_dir, &blocks_dir)
+        .unwrap()
+        .build()
         .unwrap();
     chainman.import_blocks().unwrap();
     scanner::scan_txs(&chainman, &receiver, &secret_scan_key, args.birthday);
