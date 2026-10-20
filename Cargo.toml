@@ -13,4 +13,4 @@ secp256k1 = "0.28"
 env_logger = "0.11"
 log = "0.4"
 rayon = "1.5"
-bitcoinkernel = { git = "https://github.com/nervana21/rust-bitcoinkernel", rev = "3ea1f48fc5626ad389b0017b580c051f26640c87" }
+bitcoinkernel = { git = "https://github.com/nervana21/rust-bitcoinkernel", rev = "0896549c1c082454ffd29723667f6785ca3667f5" }
