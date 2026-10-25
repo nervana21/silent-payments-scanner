@@ -111,7 +111,7 @@ dependencies = [
 [[package]]
 name = "bitcoinkernel"
 version = "0.3.2"
-source = "git+https://github.com/nervana21/rust-bitcoinkernel?rev=0896549c1c082454ffd29723667f6785ca3667f5#0896549c1c082454ffd29723667f6785ca3667f5"
+source = "git+https://github.com/nervana21/rust-bitcoinkernel?rev=4f0e5979814bb4bdb7dd0b84055eef97aac04a64#4f0e5979814bb4bdb7dd0b84055eef97aac04a64"
 dependencies = [
  "libbitcoinkernel-sys",
 ]
@@ -345,7 +345,7 @@ dependencies = [
 [[package]]
 name = "libbitcoinkernel-sys"
 version = "0.4.1"
-source = "git+https://github.com/nervana21/rust-bitcoinkernel?rev=0896549c1c082454ffd29723667f6785ca3667f5#0896549c1c082454ffd29723667f6785ca3667f5"
+source = "git+https://github.com/nervana21/rust-bitcoinkernel?rev=4f0e5979814bb4bdb7dd0b84055eef97aac04a64#4f0e5979814bb4bdb7dd0b84055eef97aac04a64"
 dependencies = [
  "cc",
 ]
